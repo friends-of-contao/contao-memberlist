@@ -61,8 +61,8 @@ $GLOBALS['TL_DCA']['tl_member']['fields']['publicFields'] = array
  * Class tl_member_memberlist
  *
  * Provide miscellaneous methods that are used by the data configuration array.
- * @copyright  Leo Feyer 2008-2009
- * @author     Leo Feyer <leo@typolight.org>
+ * @copyright  Leo Feyer 2008-2010
+ * @author     Leo Feyer <http://www.typolight.org>
  * @package    Controller
  */
 class tl_member_memberlist extends Backend
