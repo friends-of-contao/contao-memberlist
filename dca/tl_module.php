@@ -42,7 +42,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['ml_groups'] = array
 	'exclude'       => true,
 	'inputType'     => 'checkbox',
 	'foreignKey'    => 'tl_member_group.name',
-	'eval'          => array('multiple'=>true)
+	'eval'          => array('mandatory'=>true, 'multiple'=>true)
 );
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['ml_fields'] = array
@@ -51,7 +51,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['ml_fields'] = array
 	'exclude'            => true,
 	'inputType'          => 'checkboxWizard',
 	'options_callback'   => array('tl_module_memberlist', 'getViewableMemberProperties'),
-	'eval'               => array('multiple'=>true)
+	'eval'               => array('mandatory'=>true, 'multiple'=>true)
 );
 
 
