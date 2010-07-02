@@ -36,6 +36,6 @@ $GLOBALS['TL_LANG']['MOD']['memberlist'] = array('Mitgliederliste', 'Die öffent
 /**
  * Front end modules
  */
-$GLOBALS['TL_LANG']['FMD']['memberlist'] = array('Mitgliederliste', 'erzeugt eine durchsuchbare Mitgliederliste.');
+$GLOBALS['TL_LANG']['FMD']['memberlist'] = array('Mitgliederliste', 'Erzeugt eine durchsuchbare Mitgliederliste.');
 
 ?>
