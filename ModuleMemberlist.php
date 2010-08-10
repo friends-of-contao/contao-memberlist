@@ -279,7 +279,7 @@ class ModuleMemberlist extends Module
 		$this->Template->per_page = $per_page;
 
 		// Template variables
-		$this->Template->action = ampersand($this->Environment->request);
+		$this->Template->action = $this->getIndexFreeRequest();
 		$this->Template->search_label = specialchars($GLOBALS['TL_LANG']['MSC']['search']);
 		$this->Template->per_page_label = specialchars($GLOBALS['TL_LANG']['MSC']['list_perPage']);
 		$this->Template->fields_label = $GLOBALS['TL_LANG']['MSC']['all_fields'][0];
@@ -323,7 +323,7 @@ class ModuleMemberlist extends Module
 		}
 
 		// Default variables
-		$this->Template->action = ampersand($this->Environment->request);
+		$this->Template->action = $this->getIndexFreeRequest();
 		$this->Template->referer = 'javascript:history.go(-1)';
 		$this->Template->back = $GLOBALS['TL_LANG']['MSC']['goBack'];
 		$this->Template->publicProfile = sprintf($GLOBALS['TL_LANG']['MSC']['publicProfile'], $objMember->username);
