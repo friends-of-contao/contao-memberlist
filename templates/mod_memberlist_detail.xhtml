@@ -35,6 +35,7 @@
 <form action="<?php echo $this->action; ?>" method="post">
 <div class="formbody email_form">
 <input type="hidden" name="FORM_SUBMIT" value="tl_send_email" />
+<input type="hidden" name="REQUEST_TOKEN" value="{{request_token}}" />
 <div class="widget">
   <?php echo $this->widget->generateLabel(); ?><br />
   <?php echo $this->widget->generateWithError(); ?> 
