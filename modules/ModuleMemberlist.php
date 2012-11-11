@@ -115,24 +115,10 @@ class ModuleMemberlist extends \Module
 	 */
 	protected function listAllMembers()
 	{
-		$time = time();
-		$arrFields = $this->arrMlFields;
-		$intGroupLimit = (count($this->arrMlGroups) - 1);
-		$arrValues = array();
-		$strWhere = '';
-
-		// Search query
-		if (\Input::get('search') && \Input::get('for') != '' && \Input::get('for') != '*')
-		{
-			$strWhere .= \Input::get('search') . " REGEXP ? AND ";
-			$arrValues[] = \Input::get('for');
-		}
-
-		$strOptions = '';
 		$arrSortedFields = array();
 
 		// Sort fields
-		foreach ($arrFields as $field)
+		foreach ($this->arrMlFields as $field)
 		{
 			$arrSortedFields[$field] = $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['label'][0];
 		}
@@ -146,54 +132,34 @@ class ModuleMemberlist extends \Module
 		}
 
 		$this->Template->search_fields = $strOptions;
-		$strWhere .= "(";
 
-		// Filter groups
-		for ($i=0; $i<=$intGroupLimit; $i++)
-		{
-			if ($i < $intGroupLimit)
-			{
-				$strWhere .= "groups LIKE ? OR ";
-				$arrValues[] = '%"' . $this->arrMlGroups[$i] . '"%';
-			}
-			else
-			{
-				$strWhere .= "groups LIKE ?) AND ";
-				$arrValues[] = '%"' . $this->arrMlGroups[$i] . '"%';
-			}
-		}
-
-		// List active members only
-		if (in_array('username', $arrFields))
-		{
-			$strWhere .= "(publicFields!='' OR allowEmail=? OR allowEmail=?) AND disable!=1 AND (start='' OR start<=?) AND (stop='' OR stop>=?)";
-			array_push($arrValues, 'email_member', 'email_all', $time, $time);
-		}
-		else
-		{
-			$strWhere .= "publicFields!='' AND disable!=1 AND (start='' OR start<=?) AND (stop='' OR stop>=?)";
-			array_push($arrValues, $time, $time);
-		}
-
-		// Get total number of members
-		$objTotal = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_member WHERE " . $strWhere)
-						 ->execute($arrValues);
-
+		$order_by = \Input::get('order_by') ? \Input::get('order_by') . ' ' . \Input::get('sort') : 'username';
 		// Split results
 		$page = \Input::get('page') ? \Input::get('page') : 1;
 		$per_page = \Input::get('per_page') ? \Input::get('per_page') : $this->perPage;
-		$order_by = \Input::get('order_by') ? \Input::get('order_by') . ' ' . \Input::get('sort') : 'username';
-
-		// Begin query
-		$objMemberStmt = $this->Database->prepare("SELECT id, username, publicFields, " . implode(', ', $this->arrMlFields) . " FROM tl_member WHERE " . $strWhere . " ORDER BY " . $order_by);
 
 		// Limit
+		$limit = 0;
+		$offset = 0;
 		if ($per_page)
 		{
-			$objMemberStmt->limit($per_page, (($page - 1) * $per_page));
+			$limit = $per_page;
+			$offset = (($page - 1) * $per_page);
 		}
 
-		$objMember = $objMemberStmt->execute($arrValues);
+		$additionaloptions = array();
+		// HOOK: Custom member list options
+		if (isset($GLOBALS['TL_HOOKS']['setMemberlistOptions']) && is_array($GLOBALS['TL_HOOKS']['setMemberlistOptions']))
+		{
+			foreach ($GLOBALS['TL_HOOKS']['setMemberlistOptions'] as $callback)
+			{
+				$this->import($callback[0]);
+				$additionaloptions  = $this->$callback[0]->$callback[1]($this);
+			}
+		}
+
+		$memberCollection = \MemberlistMemberModel::findActiveMembers($this->arrMlFields, $this->arrMlGroups, $order_by, $additionaloptions, $limit, $offset, \Input::get('search'), \Input::get('for'));
+		$total = \MemberlistMemberModel::countActiveMembers($this->arrMlFields, $this->arrMlGroups, $additionaloptions, \Input::get('search'), \Input::get('for'));
 
 		// Prepare URL
 		$strUrl = preg_replace('/\?.*$/', '', \Environment::get('request'));
@@ -217,13 +183,13 @@ class ModuleMemberlist extends \Module
 		$arrTd = array();
 
 		// THEAD
-		for ($i=0; $i<count($arrFields); $i++)
+		for ($i=0; $i<count($this->arrMlFields); $i++)
 		{
 			$class = '';
 			$sort = 'asc';
-			$strField = strlen($label = $GLOBALS['TL_DCA']['tl_member']['fields'][$arrFields[$i]]['label'][0]) ? $label : $arrFields[$i];
+			$strField = strlen($label = $GLOBALS['TL_DCA']['tl_member']['fields'][$this->arrMlFields[$i]]['label'][0]) ? $label : $this->arrMlFields[$i];
 
-			if (\Input::get('order_by') == $arrFields[$i])
+			if (\Input::get('order_by') == $this->arrMlFields[$i])
 			{
 				$sort = (\Input::get('sort') == 'asc') ? 'desc' : 'asc';
 				$class = ' sorted ' . \Input::get('sort');
@@ -232,31 +198,31 @@ class ModuleMemberlist extends \Module
 			$arrTh[] = array
 			(
 				'link' => $strField,
-				'href' => (ampersand($strUrl) . $strVarConnector . 'order_by=' . $arrFields[$i]) . '&amp;sort=' . $sort,
+				'href' => (ampersand($strUrl) . $strVarConnector . 'order_by=' . $this->arrMlFields[$i]) . '&amp;sort=' . $sort,
 				'title' => specialchars(sprintf($GLOBALS['TL_LANG']['MSC']['list_orderBy'], $strField)),
 				'class' => $class . (($i == 0) ? ' col_first' : '')
 			);
 		}
 
 		$start = -1;
-		$limit = $objMember->numRows;
+		$lim = $memberCollection->count();
 
 		// TBODY
-		while ($objMember->next())
+		while ($memberCollection->next())
 		{
-			$publicFields = deserialize($objMember->publicFields, true);
-			$class = 'row_' . ++$start . (($start == 0) ? ' row_first' : '') . ((($start + 1) == $limit) ? ' row_last' : '') . ((($start % 2) == 0) ? ' even' : ' odd');
+			$publicFields = deserialize($memberCollection->publicFields, true);
+			$class = 'row_' . ++$start . (($start == 0) ? ' row_first' : '') . ((($start + 1) == $lim) ? ' row_last' : '') . ((($start % 2) == 0) ? ' even' : ' odd');
 
-			foreach ($arrFields as $k=>$v)
+			foreach ($this->arrMlFields as $k=>$v)
 			{
 				$value = '-';
 
 				if ($v == 'username' || in_array($v, $publicFields))
 				{
-					$value = $this->formatValue($v, $objMember->$v);
+					$value = $this->formatValue($v, $memberCollection->$v);
 				}
 
-				$arrData = $objMember->row();
+				$arrData = $memberCollection->row();
 				unset($arrData['publicFields']);
 
 				$arrTd[$class][$k] = array
@@ -264,7 +230,7 @@ class ModuleMemberlist extends \Module
 					'raw' => $arrData,
 					'content' => $value,
 					'class' => 'col_' . $k . (($k == 0) ? ' col_first' : ''),
-					'id' => $objMember->id,
+					'id' => $memberCollection->id,
 					'field' => $v
 				);
 			}
@@ -275,7 +241,7 @@ class ModuleMemberlist extends \Module
 		$this->Template->tbody = $arrTd;
 
 		// Pagination
-		$objPagination = new Pagination($objTotal->count, $per_page);
+		$objPagination = new Pagination($total, $per_page);
 		$this->Template->pagination = $objPagination->generate("\n  ");
 		$this->Template->per_page = $per_page;
 
@@ -305,12 +271,10 @@ class ModuleMemberlist extends \Module
 		$this->Template->record = array();
 
 		// Get member
-		$objMember = $this->Database->prepare("SELECT * FROM tl_member WHERE id=? AND disable!=1 AND (start='' OR start<=$time) AND (stop='' OR stop>=$time)")
-									->limit(1)
-									->execute($id);
+		$objMember = \MemberlistMemberModel::findActiveById($id);
 
 		// No member found or group not allowed
-		if ($objMember->numRows < 1 || count(array_intersect(deserialize($objMember->groups, true), $this->arrMlGroups)) < 1)
+		if (null == $objMember || count(array_intersect(deserialize($objMember->groups, true), $this->arrMlGroups)) < 1)
 		{
   			$this->Template->invalid = $GLOBALS['TL_LANG']['MSC']['invalidUserId'];
 

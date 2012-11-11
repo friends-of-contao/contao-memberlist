@@ -16,8 +16,11 @@
  */
 ClassLoader::addClasses(array
 (
+	// Models
+	'Contao\MemberlistMemberModel' => 'system/modules/memberlist/models/MemberlistMemberModel.php',
+
 	// Modules
-	'Contao\ModuleMemberlist' => 'system/modules/memberlist/modules/ModuleMemberlist.php',
+	'Contao\ModuleMemberlist'      => 'system/modules/memberlist/modules/ModuleMemberlist.php',
 ));
 
 
