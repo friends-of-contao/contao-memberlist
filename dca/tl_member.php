@@ -46,7 +46,8 @@ $GLOBALS['TL_DCA']['tl_member']['fields']['allowEmail'] = array
 	'inputType'     => 'select',
 	'options'       => array('email_member', 'email_all', 'email_nobody'),
 	'reference'     => &$GLOBALS['TL_LANG']['tl_member'],
-	'eval'          => array('feEditable'=>true, 'feGroup'=>'profile')
+	'eval'          => array('feEditable'=>true, 'feGroup'=>'profile'),
+	'sql'           => "varchar(32) NOT NULL default ''"
 );
 
 $GLOBALS['TL_DCA']['tl_member']['fields']['publicFields'] = array
@@ -55,7 +56,8 @@ $GLOBALS['TL_DCA']['tl_member']['fields']['publicFields'] = array
 	'exclude'            => true,
 	'inputType'          => 'checkbox',
 	'options_callback'   => array('tl_member_memberlist', 'getViewableMemberProperties'),
-	'eval'               => array('multiple'=>true, 'feEditable'=>true, 'feGroup'=>'profile')
+	'eval'               => array('multiple'=>true, 'feEditable'=>true, 'feGroup'=>'profile'),
+	'sql'                => "blob NULL"
 );
 
 

@@ -1,4 +1,4 @@
-<?php if (!defined('TL_ROOT')) die('You cannot access this file directly!');
+<?php
 
 /**
  * Contao Open Source CMS
@@ -28,6 +28,7 @@
  * @filesource
  */
 
+namespace Contao;
 
 /**
  * Class ModuleMemberlist
@@ -36,7 +37,7 @@
  * @author     Leo Feyer <http://www.contao.org>
  * @package    Controller
  */
-class ModuleMemberlist extends Module
+class ModuleMemberlist extends \Module
 {
 
 	/**
@@ -98,9 +99,9 @@ class ModuleMemberlist extends Module
 		$this->loadDataContainer('tl_member');
 		$this->loadLanguageFile('tl_member');
 
-		if ($this->Input->get('show'))
+		if (\Input::get('show'))
 		{
-			$this->listSingleMember($this->Input->get('show'));
+			$this->listSingleMember(\Input::get('show'));
 		}
 		else
 		{
@@ -121,10 +122,10 @@ class ModuleMemberlist extends Module
 		$strWhere = '';
 
 		// Search query
-		if ($this->Input->get('search') && $this->Input->get('for') != '' && $this->Input->get('for') != '*')
+		if (\Input::get('search') && \Input::get('for') != '' && \Input::get('for') != '*')
 		{
-			$strWhere .= $this->Input->get('search') . " REGEXP ? AND ";
-			$arrValues[] = $this->Input->get('for');
+			$strWhere .= \Input::get('search') . " REGEXP ? AND ";
+			$arrValues[] = \Input::get('for');
 		}
 
 		$strOptions = '';
@@ -141,7 +142,7 @@ class ModuleMemberlist extends Module
 		// Add searchable fields to drop-down menu
 		foreach ($arrSortedFields as $k=>$v)
 		{
-			$strOptions .= '  <option value="' . $k . '"' . (($k == $this->Input->get('search')) ? ' selected="selected"' : '') . '>' . $v . '</option>' . "\n";
+			$strOptions .= '  <option value="' . $k . '"' . (($k == \Input::get('search')) ? ' selected="selected"' : '') . '>' . $v . '</option>' . "\n";
 		}
 
 		$this->Template->search_fields = $strOptions;
@@ -179,9 +180,9 @@ class ModuleMemberlist extends Module
 						 ->execute($arrValues);
 
 		// Split results
-		$page = $this->Input->get('page') ? $this->Input->get('page') : 1;
-		$per_page = $this->Input->get('per_page') ? $this->Input->get('per_page') : $this->perPage;
-		$order_by = $this->Input->get('order_by') ? $this->Input->get('order_by') . ' ' . $this->Input->get('sort') : 'username';
+		$page = \Input::get('page') ? \Input::get('page') : 1;
+		$per_page = \Input::get('per_page') ? \Input::get('per_page') : $this->perPage;
+		$order_by = \Input::get('order_by') ? \Input::get('order_by') . ' ' . \Input::get('sort') : 'username';
 
 		// Begin query
 		$objMemberStmt = $this->Database->prepare("SELECT id, username, publicFields, " . implode(', ', $this->arrMlFields) . " FROM tl_member WHERE " . $strWhere . " ORDER BY " . $order_by);
@@ -195,7 +196,7 @@ class ModuleMemberlist extends Module
 		$objMember = $objMemberStmt->execute($arrValues);
 
 		// Prepare URL
-		$strUrl = preg_replace('/\?.*$/', '', $this->Environment->request);
+		$strUrl = preg_replace('/\?.*$/', '', \Environment::get('request'));
 		$this->Template->url = $strUrl;
 		$blnQuery = false;
 
@@ -222,10 +223,10 @@ class ModuleMemberlist extends Module
 			$sort = 'asc';
 			$strField = strlen($label = $GLOBALS['TL_DCA']['tl_member']['fields'][$arrFields[$i]]['label'][0]) ? $label : $arrFields[$i];
 
-			if ($this->Input->get('order_by') == $arrFields[$i])
+			if (\Input::get('order_by') == $arrFields[$i])
 			{
-				$sort = ($this->Input->get('sort') == 'asc') ? 'desc' : 'asc';
-				$class = ' sorted ' . $this->Input->get('sort');
+				$sort = (\Input::get('sort') == 'asc') ? 'desc' : 'asc';
+				$class = ' sorted ' . \Input::get('sort');
 			}
 
 			$arrTh[] = array
@@ -284,10 +285,10 @@ class ModuleMemberlist extends Module
 		$this->Template->per_page_label = specialchars($GLOBALS['TL_LANG']['MSC']['list_perPage']);
 		$this->Template->fields_label = $GLOBALS['TL_LANG']['MSC']['all_fields'][0];
 		$this->Template->keywords_label = $GLOBALS['TL_LANG']['MSC']['keywords'];
-		$this->Template->search = $this->Input->get('search');
-		$this->Template->for = $this->Input->get('for');
-		$this->Template->order_by = $this->Input->get('order_by');
-		$this->Template->sort = $this->Input->get('sort');
+		$this->Template->search = \Input::get('search');
+		$this->Template->for = \Input::get('for');
+		$this->Template->order_by = \Input::get('order_by');
+		$this->Template->sort = \Input::get('sort');
 	}
 
 
@@ -442,14 +443,14 @@ class ModuleMemberlist extends Module
 				$replyTo = $this->User->firstname . ' ' . $this->User->lastname . ' <' . $replyTo . '>';
 			}
 
-			$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['subjectFeUser'], $this->User->username, $this->Environment->host);
-			$objEmail->text .= "\n\n---\n\n" . sprintf($GLOBALS['TL_LANG']['MSC']['sendersProfile'], $this->Environment->base . preg_replace('/show=[0-9]+/', 'show=' . $this->User->id, $this->Environment->request));
+			$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['subjectFeUser'], $this->User->username, \Environment::get('host'));
+			$objEmail->text .= "\n\n---\n\n" . sprintf($GLOBALS['TL_LANG']['MSC']['sendersProfile'], \Environment::get('base') . preg_replace('/show=[0-9]+/', 'show=' . $this->User->id, \Environment::get('request')));
 
 			$objEmail->replyTo($replyTo);
 		}
 		else
 		{
-			$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['subjectUnknown'], $this->Environment->host);
+			$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['subjectUnknown'], \Environment::get('host'));
 		}
 
 		// Send e-mail
@@ -515,7 +516,7 @@ class ModuleMemberlist extends Module
 		// E-mail addresses
 		elseif ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] == 'email')
 		{
-			$value = $this->String->encodeEmail($value);
+			$value = String::encodeEmail($value);
 			$value = '<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;' . $value . '">' . $value . '</a>';
 		}
 
