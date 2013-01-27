@@ -205,34 +205,37 @@ class ModuleMemberlist extends \Module
 		}
 
 		$start = -1;
-		$lim = $memberCollection->count();
-
-		// TBODY
-		while ($memberCollection->next())
+		if ($memberCollection)
 		{
-			$publicFields = deserialize($memberCollection->publicFields, true);
-			$class = 'row_' . ++$start . (($start == 0) ? ' row_first' : '') . ((($start + 1) == $lim) ? ' row_last' : '') . ((($start % 2) == 0) ? ' even' : ' odd');
+			$lim = $memberCollection->count();
 
-			foreach ($this->arrMlFields as $k=>$v)
+			// TBODY
+			while ($memberCollection->next())
 			{
-				$value = '-';
+				$publicFields = deserialize($memberCollection->publicFields, true);
+				$class = 'row_' . ++$start . (($start == 0) ? ' row_first' : '') . ((($start + 1) == $lim) ? ' row_last' : '') . ((($start % 2) == 0) ? ' even' : ' odd');
 
-				if ($v == 'username' || in_array($v, $publicFields))
+				foreach ($this->arrMlFields as $k=>$v)
 				{
-					$value = $this->formatValue($v, $memberCollection->$v);
+					$value = '-';
+
+					if ($v == 'username' || in_array($v, $publicFields))
+					{
+						$value = $this->formatValue($v, $memberCollection->$v);
+					}
+
+					$arrData = $memberCollection->row();
+					unset($arrData['publicFields']);
+
+					$arrTd[$class][$k] = array
+					(
+						'raw' => $arrData,
+						'content' => $value,
+						'class' => 'col_' . $k . (($k == 0) ? ' col_first' : ''),
+						'id' => $memberCollection->id,
+						'field' => $v
+					);
 				}
-
-				$arrData = $memberCollection->row();
-				unset($arrData['publicFields']);
-
-				$arrTd[$class][$k] = array
-				(
-					'raw' => $arrData,
-					'content' => $value,
-					'class' => 'col_' . $k . (($k == 0) ? ' col_first' : ''),
-					'id' => $memberCollection->id,
-					'field' => $v
-				);
 			}
 		}
 
