@@ -34,5 +34,6 @@
  */
 $GLOBALS['TL_LANG']['tl_module']['ml_groups'] = array('Gruppen', 'Diese Gruppen werden in der Mitgliederliste veröffentlicht.');
 $GLOBALS['TL_LANG']['tl_module']['ml_fields'] = array('Felder', 'Diese Felder werden (vorbehaltlich individueller Einstellungen) veröffentlicht.');
+$GLOBALS['TL_LANG']['tl_module']['ml_sort'] = array("Initiale Sortierreihenfolge", "Bitte wählen Sie eine initiale Sortierreihenfolge für die Mitgliederliste.");
 
 ?>

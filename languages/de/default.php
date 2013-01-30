@@ -33,6 +33,7 @@
  * Miscellaneous
  */
 $GLOBALS['TL_LANG']['MSC']['subject']        = 'Betreff';
+$GLOBALS['TL_LANG']['MSC']['email']          = 'E-Mail-Adresse';
 $GLOBALS['TL_LANG']['MSC']['message']        = 'Nachricht';
 $GLOBALS['TL_LANG']['MSC']['sendMessage']    = 'E-Mail senden';
 $GLOBALS['TL_LANG']['MSC']['messageSent']    = 'Ihre Nachricht wurde gesendet.';

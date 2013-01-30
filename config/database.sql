@@ -28,5 +28,6 @@ CREATE TABLE `tl_member` (
 
 CREATE TABLE `tl_module` (
   `ml_groups` blob NULL,
-  `ml_fields` blob NULL
+  `ml_fields` blob NULL,
+  `ml_sort` varchar(255) NOT NULL default '',
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

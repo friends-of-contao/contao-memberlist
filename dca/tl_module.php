@@ -32,7 +32,7 @@
 /**
  * Add palettes to tl_module
  */
-$GLOBALS['TL_DCA']['tl_module']['palettes']['memberlist'] = '{title_legend},name,headline,type;{config_legend},ml_groups,ml_fields,perPage;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['memberlist'] = '{title_legend},name,headline,type;{config_legend},ml_groups,ml_fields,ml_sort,perPage;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 
 
 /**
@@ -56,6 +56,14 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['ml_fields'] = array
 	'eval'               => array('mandatory'=>true, 'multiple'=>true)
 );
 
+$GLOBALS['TL_DCA']['tl_module']['fields']['ml_sort'] = array
+(
+	'label'                   => &$GLOBALS['TL_LANG']['tl_module']['ml_sort'],
+	'exclude'                 => true,
+	'inputType'               => 'select',
+	'options_callback'        => array('tl_module_memberlist', 'getMemberListFields'),
+	'eval'                    => array('includeBlankOption' => true, 'tl_class'=>'w50')
+);
 
 /**
  * Class tl_module_memberlist
@@ -92,6 +100,26 @@ class tl_module_memberlist extends Backend
 			}
 		}
 
+		return $return;
+	}
+
+	/**
+	 * Return all visible fields of table tl_member
+	 * @return array
+	 */
+	public function getMemberListFields()
+	{
+		$return = array();
+
+		$this->loadLanguageFile('tl_member');
+		$this->loadDataContainer('tl_member');
+		foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $k=>$v)
+		{
+			if ($v['eval']['feEditable'])
+			{
+				$return[$k] = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['label'][0];
+			}
+		}
 		return $return;
 	}
 }

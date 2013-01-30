@@ -174,6 +174,16 @@ class ModuleMemberlist extends Module
 			array_push($arrValues, $time, $time);
 		}
 
+		// HOOK: add custom logic
+		if (isset($GLOBALS['TL_HOOKS']['memberlistQuery']) && is_array($GLOBALS['TL_HOOKS']['memberlistQuery']))
+		{
+			foreach ($GLOBALS['TL_HOOKS']['memberlistQuery'] as $callback)
+			{
+				$this->import($callback[0]);
+				$this->$callback[0]->$callback[1]($this, $strWhere, $arrValues);
+			}
+		}
+
 		// Get total number of members
 		$objTotal = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_member WHERE " . $strWhere)
 						 ->execute($arrValues);
@@ -181,7 +191,16 @@ class ModuleMemberlist extends Module
 		// Split results
 		$page = $this->Input->get('page') ? $this->Input->get('page') : 1;
 		$per_page = $this->Input->get('per_page') ? $this->Input->get('per_page') : $this->perPage;
-		$order_by = $this->Input->get('order_by') ? $this->Input->get('order_by') . ' ' . $this->Input->get('sort') : 'username';
+		$order_by = "";
+		if (strlen($this->ml_sort) && (!strlen($this->Input->get('order_by'))) && (in_array($this->ml_sort, $this->arrMlFields))) 
+		{
+			$order_by = $this->ml_sort;
+		}
+		else
+		{
+			$order_by = $this->Input->get('order_by') ? $this->Input->get('order_by') . ' ' . $this->Input->get('sort') : 'username';
+		}
+
 
 		// Begin query
 		$objMemberStmt = $this->Database->prepare("SELECT id, username, publicFields, " . implode(', ', $this->arrMlFields) . " FROM tl_member WHERE " . $strWhere . " ORDER BY " . $order_by);
@@ -195,14 +214,23 @@ class ModuleMemberlist extends Module
 		$objMember = $objMemberStmt->execute($arrValues);
 
 		// Prepare URL
-		$strUrl = preg_replace('/\?.*$/', '', $this->Environment->request);
-		$this->Template->url = $strUrl;
-		$blnQuery = false;
+		if ($GLOBALS['TL_CONFIG']['disableAlias'] == true)
+		{
+			$strUrl = preg_replace('/\&.*$/', '', $this->Environment->request);
+			$this->Template->url = $strUrl . '&amp;';
+			$blnQuery = true;
+		}
+		else
+		{
+			$strUrl = preg_replace('/\?.*$/', '', $this->Environment->request);
+			$this->Template->url = $strUrl . '?';
+			$blnQuery = false;
+		}
 
 		// Add GET parameters
 		foreach (preg_split('/&(amp;)?/', $_SERVER['QUERY_STRING']) as $fragment)
 		{
-			if (strlen($fragment) && strncasecmp($fragment, 'order_by', 8) !== 0 && strncasecmp($fragment, 'sort', 4) !== 0 && strncasecmp($fragment, 'page', 4) !== 0)
+			if (strlen($fragment) && strncasecmp($fragment, 'order_by', 8) !== 0 && strncasecmp($fragment, 'sort', 4) !== 0 && strncasecmp($fragment, 'page', 4) !== 0 && strncasecmp($fragment, 'id', 2) !== 0)
 			{
 				$strUrl .= (!$blnQuery ? '?' : '&amp;') . $fragment;
 				$blnQuery = true;
@@ -288,6 +316,7 @@ class ModuleMemberlist extends Module
 		$this->Template->for = $this->Input->get('for');
 		$this->Template->order_by = $this->Input->get('order_by');
 		$this->Template->sort = $this->Input->get('sort');
+		$this->Template->total_members = $objTotal->count;
 	}
 
 
@@ -365,29 +394,58 @@ class ModuleMemberlist extends Module
 		// Handle personal messages
 		if ($this->Template->allowEmail > 1)
 		{
-			$arrField = array
-			(
-				'name'      => 'message',
-				'label'     => $GLOBALS['TL_LANG']['MSC']['message'],
-				'inputType' => 'textarea',
-				'eval'      => array('mandatory'=>true, 'required'=>true, 'rows'=>4, 'cols'=>40, 'decodeEntities'=>true)
+			$arrFields = array(
+				array
+				(
+					'name'      => 'email',
+					'label'     => $GLOBALS['TL_LANG']['MSC']['email'],
+					'inputType' => 'text',
+					'default'   => $objMember->email,
+					'eval'      => array('mandatory'=>true, 'required'=>true, 'maxlength'=>255, 'rgxp'=>'email', 'decodeEntities'=>true)
+				),
+				array
+				(
+					'name'      => 'message',
+					'label'     => $GLOBALS['TL_LANG']['MSC']['message'],
+					'inputType' => 'textarea',
+					'eval'      => array('mandatory'=>true, 'required'=>true, 'rows'=>4, 'cols'=>40, 'decodeEntities'=>true)
+				)
 			);
 
-			$arrWidget = $this->prepareForWidget($arrField, $arrField['name'], '');
-			$objWidget = new FormTextArea($arrWidget);
-
-			// Validate widget
-			if ($this->Input->post('FORM_SUBMIT') == 'tl_send_email')
+			$hasErrors = false;
+			$widgets = array();
+			foreach ($arrFields as $arrField)
 			{
-				$objWidget->validate();
-
-				if (!$objWidget->hasErrors())
+				$arrWidget = $this->prepareForWidget($arrField, $arrField['name'], $arrField['default']);
+				$objWidget = null;
+				switch ($arrField['inputType'])
 				{
-					$this->sendPersonalMessage($objMember, $objWidget);
+					case 'textarea':
+						$objWidget = new FormTextArea($arrWidget);
+						break;
+					case 'text':
+						$objWidget = new FormTextField($arrWidget);
+						break;
 				}
-			}
 
-			$this->Template->widget = $objWidget;
+				// Validate widget
+				if ($this->Input->post('FORM_SUBMIT') == 'tl_send_email')
+				{
+					$objWidget->validate();
+
+					if ($objWidget->hasErrors())
+					{
+						$hasErrors = true;
+					}
+				}
+				array_push($widgets, $objWidget);
+			}
+			if ($this->Input->post('FORM_SUBMIT') == 'tl_send_email' && !$hasErrors)
+			{
+				if (!$hasErrors) $this->sendPersonalMessage($objMember, $widgets[0]->value, $widgets[1]->value);
+			}
+			
+			$this->Template->widgets = $widgets;
 			$this->Template->submit = $GLOBALS['TL_LANG']['MSC']['sendMessage'];
 		}
 
@@ -422,19 +480,19 @@ class ModuleMemberlist extends Module
 	 * @param object
 	 * @param object
 	 */
-	protected function sendPersonalMessage(Database_Result $objMember, Widget $objWidget)
+	protected function sendPersonalMessage(Database_Result $objMember, $email, $text)
 	{
 		$objEmail = new Email();
 
 		$objEmail->from = $GLOBALS['TL_ADMIN_EMAIL'];
 		$objEmail->fromName = 'Contao mailer';
-		$objEmail->text = $objWidget->value;
+		$objEmail->text = $text;
 
 		// Add reply to
 		if (FE_USER_LOGGED_IN)
 		{
 			$this->import('FrontendUser', 'User');
-			$replyTo = $this->User->email;
+			$replyTo = strlen($email) ? $email : $this->User->email;
 
 			// Add name
 			if (strlen($this->User->firstname))
