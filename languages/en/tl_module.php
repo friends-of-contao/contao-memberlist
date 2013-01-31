@@ -34,6 +34,6 @@
  */
 $GLOBALS['TL_LANG']['tl_module']['ml_groups'] = array('Groups', 'These groups will be listed in the memberlist.');
 $GLOBALS['TL_LANG']['tl_module']['ml_fields'] = array('Fields', 'These fields will be visible (subject to individual privacy settings).');
-$GLOBALS['TL_LANG']['tl_module']['ml_sort'] = array('Initial sort order', 'Please select the initial sort order of the memberlist.');
+$GLOBALS['TL_LANG']['tl_module']['ml_sort'] = array('Default sort order', 'Please select the default sort order of the memberlist.');
 
 ?>
