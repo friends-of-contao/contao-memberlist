@@ -409,6 +409,17 @@ class ModuleMemberlist extends Module
 					'label'     => $GLOBALS['TL_LANG']['MSC']['message'],
 					'inputType' => 'textarea',
 					'eval'      => array('mandatory'=>true, 'required'=>true, 'rows'=>4, 'cols'=>40, 'decodeEntities'=>true)
+				),
+				array
+				(
+					'id' => 'registration',
+					'label' => $GLOBALS['TL_LANG']['MSC']['securityQuestion'],
+					'inputType' => 'captcha',
+					'question' => '',
+					'type' => 'captcha',
+					'mandatory' => true,
+					'required' => true,
+					'name'      => 'captcha'
 				)
 			);
 
@@ -425,6 +436,9 @@ class ModuleMemberlist extends Module
 						break;
 					case 'text':
 						$objWidget = new FormTextField($arrWidget);
+						break;
+					case 'captcha':
+						$objWidget = new FormCaptcha($arrWidget);
 						break;
 				}
 
