@@ -214,7 +214,7 @@ class ModuleMemberlist extends Module
 		$objMember = $objMemberStmt->execute($arrValues);
 
 		// Prepare URL
-		if ($GLOBALS['TL_CONFIG']['disableAlias'] == true)
+		if ($GLOBALS['TL_CONFIG']['disableAlias'] == true && strlen($this->Environment->request))
 		{
 			$strUrl = preg_replace('/\&.*$/', '', $this->Environment->request);
 			$this->Template->url = $strUrl . '&amp;';
