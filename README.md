@@ -13,7 +13,7 @@ memberListFormatValue
 ---------------------
 Der "memberListFormatValue"-Hook wird beim formatieren von Ausgabewerten für die Mitgliederliste ausgeführt. Er übergibt den Namen des Contao Mitgliedsfeldes, den Wert, der diesem Feld zugeordnet ist und einen booleschen Wert, der angibt, ob es sich bei der Ausgabe um einen einzelnen Mitgliedseintrag handelt, oder um einen Listeneintrag. Als Rückgabewert erwartet die Funktion einen String-Wert für die Frontendausgabe des Mitgliedsfeldes, oder wenn es sich nicht um das Feld handelt den booleschen Wert false, damit die reguläre Mitgliederlisten-Ausgabe durchgeführt wird.
 
-```
+```php
 // config.php
 $GLOBALS['TL_HOOKS']['memberListFormatValue'][] = array('MyClass', 'formatValue');
  
