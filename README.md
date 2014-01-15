@@ -11,37 +11,38 @@ Damit Contao-Erweiterungen, die eigene Feldtypen definieren die Möglichkeit hab
 
 memberListFormatValue
 ---------------------
-Der "memberListFormatValue"-Hook wird beim formatieren von Ausgabewerten für die Mitgliederliste ausgeführt. Er übergibt den Namen des Contao Mitgliedsfeldes, den Wert, der diesem Feld zugeordnet ist und einen booleschen Wert, der angibt, ob es sich bei der Ausgabe um einen einzelnen Mitgliedseintrag handelt, oder um einen Listeneintrag. Als Rückgabewert erwartet die Funktion einen String-Wert für die Frontendausgabe des Mitgliedsfeldes, oder wenn es sich nicht um das Feld handelt den booleschen Wert false, damit die reguläre Mitgliederlisten-Ausgabe durchgeführt wird.
+Der "memberListFormatValue"-Hook wird beim formatieren von Ausgabewerten für die Mitgliederliste ausgeführt. Er übergibt den Namen des Contao Mitgliedsfeldes, den Wert, der diesem Feld zugeordnet ist, ein Collection-Objekt mit den Mitgliedsdaten und einen booleschen Wert, der angibt, ob es sich bei der Ausgabe um einen einzelnen Mitgliedseintrag handelt, oder um einen Listeneintrag. Als Rückgabewert erwartet die Funktion einen String-Wert für die Frontendausgabe des Mitgliedsfeldes, oder wenn es sich nicht um das Feld handelt den booleschen Wert false, damit die reguläre Mitgliederlisten-Ausgabe durchgeführt wird.
 
 ```
 // config.php
 $GLOBALS['TL_HOOKS']['memberListFormatValue'][] = array('MyClass', 'formatValue');
  
 // MyClass.php
-public function formatValue($k, $value, $blnListSingle=false
+public function formatValue($k, $value, $objMember, $blnListSingle=false)
 {
-		// Avatar
-		if (strcmp($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['inputType'], 'avatar') == 0)
-		{
-			$objFile = \FilesModel::findByUuid($value);
-			if ($objFile === null && $GLOBALS['TL_CONFIG']['avatar_fallback_image']) {
-				$objFile = \FilesModel::findByUuid($GLOBALS['TL_CONFIG']['avatar_fallback_image']);
-			}
+  // Avatar
+  if (strcmp($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['inputType'], 'avatar') == 0)
+  {
+    $objFile = \FilesModel::findByUuid($value);
+    if ($objFile === null && $GLOBALS['TL_CONFIG']['avatar_fallback_image']) {
+      $objFile = \FilesModel::findByUuid($GLOBALS['TL_CONFIG']['avatar_fallback_image']);
+    }
 
-			if ($objFile !== null) {
-				$value = '<img src="' . TL_FILES_URL . \Image::get(
-					$objFile->path,
-					$arrImage[0],
-					$arrImage[1],
-					$arrImage[2]
-				) . '" width="' . $arrImage[0] . '" height="' . $arrImage[1] . '" alt="' . $strAlt . '" class="avatar">';
-			}
-			else
-			{
-				$value = "-";
-			}
-			return $value;
-		}
-		return false;
+    $strAlt = $objMember->firstname . " " . $objMember->lastname;
+    if ($objFile !== null) {
+      $value = '<img src="' . TL_FILES_URL . \Image::get(
+        $objFile->path,
+        $arrImage[0],
+        $arrImage[1],
+        $arrImage[2]
+        ) . '" width="' . $arrImage[0] . '" height="' . $arrImage[1] . '" alt="' . $strAlt . '" class="avatar">';
+    }
+    else
+    {
+      $value = "-";
+    }
+    return $value;
+  }
+  return false;
 }
 ```
