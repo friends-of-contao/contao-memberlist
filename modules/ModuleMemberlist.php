@@ -411,6 +411,40 @@ class ModuleMemberlist extends \Module
 	{
 		$value = deserialize($value);
 
+		// HOOK: Custom member list field output
+		if (isset($GLOBALS['TL_HOOKS']['memberListFormatValue']) && is_array($GLOBALS['TL_HOOKS']['memberListFormatValue']))
+		{
+			foreach ($GLOBALS['TL_HOOKS']['memberListFormatValue'] as $callback)
+			{
+				$this->import($callback[0]);
+				$res = $this->$callback[0]->$callback[1]($k, $value, $blnListSingle);
+				if ($res !== false) return $res;
+			}
+		}
+
+		// Avatar
+		if (strcmp($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['inputType'], 'avatar') == 0)
+		{
+			$objFile = \FilesModel::findByUuid($value);
+			if ($objFile === null && $GLOBALS['TL_CONFIG']['avatar_fallback_image']) {
+				$objFile = \FilesModel::findByUuid($GLOBALS['TL_CONFIG']['avatar_fallback_image']);
+			}
+
+			if ($objFile !== null) {
+				$value = '<img src="' . TL_FILES_URL . \Image::get(
+					$objFile->path,
+					$arrImage[0],
+					$arrImage[1],
+					$arrImage[2]
+				) . '" width="' . $arrImage[0] . '" height="' . $arrImage[1] . '" alt="' . $strAlt . '" class="avatar">';
+			}
+			else
+			{
+				$value = "-";
+			}
+			return $value;
+		}
+
 		// Return if empty
 		if ($value == '')
 		{
