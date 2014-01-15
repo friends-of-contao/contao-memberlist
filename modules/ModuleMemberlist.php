@@ -193,7 +193,7 @@ class ModuleMemberlist extends \Module
 
 					if ($v == 'username' || in_array($v, $publicFields))
 					{
-						$value = $this->formatValue($v, $memberCollection->$v);
+						$value = $this->formatValue($v, $memberCollection->$v, $memberCollection);
 					}
 
 					$arrData = $memberCollection->row();
@@ -345,7 +345,7 @@ class ModuleMemberlist extends \Module
 				$arrFields[$k] = array
 				(
 					'raw' => $objMember->row(),
-					'content' => $this->formatValue($v, $objMember->$v, true),
+					'content' => $this->formatValue($v, $objMember->$v, $objMember, true),
 					'class' => $class,
 					'label' => (strlen($label = $GLOBALS['TL_DCA']['tl_member']['fields'][$v]['label'][0]) ? $label : $v),
 					'field' => $v
@@ -407,7 +407,7 @@ class ModuleMemberlist extends \Module
 	 * @param boolean
 	 * @return mixed
 	 */
-	protected function formatValue($k, $value, $blnListSingle=false)
+	protected function formatValue($k, $value, $objMember, $blnListSingle=false)
 	{
 		$value = deserialize($value);
 
@@ -417,7 +417,7 @@ class ModuleMemberlist extends \Module
 			foreach ($GLOBALS['TL_HOOKS']['memberListFormatValue'] as $callback)
 			{
 				$this->import($callback[0]);
-				$res = $this->$callback[0]->$callback[1]($k, $value, $blnListSingle);
+				$res = $this->$callback[0]->$callback[1]($k, $value, $objMember, $blnListSingle);
 				if ($res !== false) return $res;
 			}
 		}
@@ -430,6 +430,7 @@ class ModuleMemberlist extends \Module
 				$objFile = \FilesModel::findByUuid($GLOBALS['TL_CONFIG']['avatar_fallback_image']);
 			}
 
+			$strAlt = $objMember->firstname . " " . $objMember->lastname;
 			if ($objFile !== null) {
 				$value = '<img src="' . TL_FILES_URL . \Image::get(
 					$objFile->path,
