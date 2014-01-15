@@ -16,7 +16,7 @@ Der "memberListFormatValue"-Hook wird beim formatieren von Ausgabewerten für di
 ```php
 // config.php
 $GLOBALS['TL_HOOKS']['memberListFormatValue'][] = array('MyClass', 'formatValue');
- 
+
 // MyClass.php
 public function formatValue($k, $value, $objMember, $blnListSingle=false)
 {
