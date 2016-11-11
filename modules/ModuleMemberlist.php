@@ -67,7 +67,14 @@ class ModuleMemberlist extends \Module
 	 */
 	protected function compile()
 	{
-		$this->import('String');
+		if (!version_compare(VERSION, '3.5', '<'))
+		{
+			$this->import('StringUtil');
+		}
+		else 
+		{	
+			$this->import('String');
+		}
 		$this->loadDataContainer('tl_member');
 		$this->loadLanguageFile('tl_member');
 
