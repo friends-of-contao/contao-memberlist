@@ -67,7 +67,6 @@ class ModuleMemberlist extends \Module
 	 */
 	protected function compile()
 	{
-		$this->import('String');
 		$this->loadDataContainer('tl_member');
 		$this->loadLanguageFile('tl_member');
 
@@ -126,7 +125,7 @@ class ModuleMemberlist extends \Module
 			foreach ($GLOBALS['TL_HOOKS']['setMemberlistOptions'] as $callback)
 			{
 				$this->import($callback[0]);
-				$additionaloptions  = $this->$callback[0]->$callback[1]($this);
+				$additionaloptions  = $this->$callback[0]->{$callback[1]}($this);
 			}
 		}
 
@@ -417,7 +416,7 @@ class ModuleMemberlist extends \Module
 			foreach ($GLOBALS['TL_HOOKS']['memberListFormatValue'] as $callback)
 			{
 				$this->import($callback[0]);
-				$res = $this->$callback[0]->$callback[1]($k, $value, $blnListSingle);
+				$res = $this->$callback[0]->{$callback[1]}($k, $value, $blnListSingle);
 				if ($res !== false) return $res;
 			}
 		}
@@ -489,7 +488,7 @@ class ModuleMemberlist extends \Module
 		// E-mail addresses
 		elseif ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] == 'email')
 		{
-			$value = String::encodeEmail($value);
+			$value = \StringUtil::encodeEmail($value);
 			$value = '<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;' . $value . '">' . $value . '</a>';
 		}
 
