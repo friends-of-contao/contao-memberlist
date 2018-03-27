@@ -77,5 +77,3 @@ class tl_module_memberlist extends Backend
 		return $return;
 	}
 }
-
-?>
