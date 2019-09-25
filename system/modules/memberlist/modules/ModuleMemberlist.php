@@ -125,7 +125,7 @@ class ModuleMemberlist extends \Module
 			foreach ($GLOBALS['TL_HOOKS']['setMemberlistOptions'] as $callback)
 			{
 				$this->import($callback[0]);
-				$additionaloptions  = $this->$callback[0]->{$callback[1]}($this);
+				$additionaloptions  = $this->{$callback[0]}->{$callback[1]}($this);
 			}
 		}
 
