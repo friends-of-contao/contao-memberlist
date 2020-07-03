@@ -91,7 +91,7 @@ class ModuleMemberlist extends \Module
 		// Sort fields
 		foreach ($this->arrMlFields as $field)
 		{
-			$arrSortedFields[$field] = $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['label'][0];
+			$arrSortedFields[$field] = $GLOBALS['TL_LANG']['tl_member'][$field][0];
 		}
 
 		natcasesort($arrSortedFields);
