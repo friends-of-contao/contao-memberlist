@@ -86,19 +86,14 @@ class ModuleMemberlist extends \Module
 	 */
 	protected function listAllMembers()
 	{
+		\Contao\Controller::loadDataContainer('tl_member');
+
 		$arrSortedFields = array();
 
 		// Sort fields
 		foreach ($this->arrMlFields as $field)
 		{
-			if (isset($GLOBALS['TL_DCA']['tl_member']['fields'][$field]['label']))
-			{
-				$arrSortedFields[$field] = $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['label'][0];
-			}
-			else
-			{
-				$arrSortedFields[$field] = $GLOBALS['TL_LANG']['tl_member'][$field][0];
-			}
+			$arrSortedFields[$field] = $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['label'][0];
 		}
 
 		natcasesort($arrSortedFields);
