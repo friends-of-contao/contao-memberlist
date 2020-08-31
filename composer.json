@@ -1,5 +1,4 @@
 {
-	"version": "999",
 	"name": "friends-of-contao/contao-memberlist",
 	"description": "List the members of your website and allow them to send e-mails (depending on their privacy settings).",
 	"keywords": [
