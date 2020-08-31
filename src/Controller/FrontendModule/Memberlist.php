@@ -98,6 +98,8 @@ class Memberlist extends AbstractFrontendModuleController
             $this->listAllMembers();
         }
 
+        // die('<pre>' . __METHOD__ . ":\n" . print_r($this->Template, true) . "\n#################################\n\n" . '</pre>');
+
         return $this->Template->getResponse();
     }
 
@@ -262,16 +264,19 @@ class Memberlist extends AbstractFrontendModuleController
         global $objPage;
 
         $time = time();
-        $this->Template->name = 'mod_memberlist_detail';
+        $this->Template->setName('mod_memberlist_detail');
         $this->Template->record = [];
 
         // Get member
         $objMember = MemberlistMemberModel::findActiveById($id);
 
+        // die('<pre>' . __METHOD__ . ":\n" . print_r($objMember, true) . "\n#################################\n\n" . '</pre>');
+
         // No member found or group not allowed
         if (null == $objMember || count(array_intersect(StringUtil::deserialize($objMember->groups, true), $this->arrMlGroups)) < 1) {
             $this->Template->invalid = $GLOBALS['TL_LANG']['MSC']['invalidUserId'];
 
+            // die('<pre>' . __METHOD__ . ":\n" . print_r('ASD', true) . "\n#################################\n\n" . '</pre>');
             // Do not index the page
             $objPage->noSearch = 1;
             $objPage->cache = 0;

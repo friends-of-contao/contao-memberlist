@@ -179,7 +179,7 @@ class MemberlistMemberModel extends Model
 		$time = time();
 		$t = static::$strTable;
 
-		$arrColumns = array("$t.id=? AND $t.login=1 AND ($t.start='' OR $t.start<$time) AND ($t.stop='' OR $t.stop>$time) AND $t.disable=''");
+		$arrColumns = array("$t.id=? AND ($t.start='' OR $t.start<$time) AND ($t.stop='' OR $t.stop>$time) AND $t.disable=''");
 
 		return static::findOneBy($arrColumns, array($intId));
 	}
