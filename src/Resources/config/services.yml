@@ -1,0 +1,11 @@
+services:
+    _defaults:
+        autowire: true
+
+    Foc\Memberlist\Controller\FrontendModule\Memberlist:
+        tags:
+            -
+                name: contao.frontend_module
+                type: memberlist
+                category: user
+                template: mod_memberlist

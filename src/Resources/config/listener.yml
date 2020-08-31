@@ -1,0 +1,6 @@
+services:
+    foc.memberlist.listener.initialize.system:
+        class: Foc\Memberlist\EventListener\Initialize\System
+        autowire: true
+        tags:
+            - { name: kernel.event_listener, event: kernel.request}
