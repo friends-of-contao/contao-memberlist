@@ -69,6 +69,10 @@ class Memberlist extends AbstractFrontendModuleController
     {
         $this->Template = $template;
 
+        if ($model->memberlist_template) {
+            $this->Template->setName($model->memberlist_template);
+        }
+
         if (($this->User = $this->security->getUser()) instanceof BackendUser) {
 			$this->Template->name = 'be_wildcard';
 
@@ -97,8 +101,6 @@ class Memberlist extends AbstractFrontendModuleController
         } else {
             $this->listAllMembers();
         }
-
-        // die('<pre>' . __METHOD__ . ":\n" . print_r($this->Template, true) . "\n#################################\n\n" . '</pre>');
 
         return $this->Template->getResponse();
     }
