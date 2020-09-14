@@ -14,7 +14,10 @@
 /**
  * Run in a custom namespace, so the class can be replaced
  */
-namespace Contao;
+namespace Foc\Memberlist\Model;
+
+use Contao\Model;
+use Contao\Collection;
 
 
 /**
@@ -24,7 +27,7 @@ namespace Contao;
  * @author    Helmut Schottmüller <https://github.com/hschottm>
  * @copyright Helmut Schottmüller 2012
  */
-class MemberlistMemberModel extends \Model
+class MemberlistMemberModel extends Model
 {
 	/**
 	 * Table name
@@ -108,7 +111,7 @@ class MemberlistMemberModel extends \Model
 	 * @param string $search    Name of a special search option
 	 * @param string $for    Value of a special search option
 	 * 
-	 * @return \Collection|null The collection or null if there are no members
+	 * @return Collection|null The collection or null if there are no members
 	 */
 	public static function findActiveMembers($arrFields, $arrMemberGroups, $order, $additionaloptions, $limit = 0, $offset = 0, $search = '', $for = '')
 	{
@@ -169,14 +172,14 @@ class MemberlistMemberModel extends \Model
 	 * 
 	 * @param int $intId    The member id
 	 * 
-	 * @return \Model|null The model or null if there is no member
+	 * @return Model|null The model or null if there is no member
 	 */
 	public static function findActiveById($intId)
 	{
 		$time = time();
 		$t = static::$strTable;
 
-		$arrColumns = array("$t.id=? AND $t.login=1 AND ($t.start='' OR $t.start<$time) AND ($t.stop='' OR $t.stop>$time) AND $t.disable=''");
+		$arrColumns = array("$t.id=? AND ($t.start='' OR $t.start<$time) AND ($t.stop='' OR $t.stop>$time) AND $t.disable=''");
 
 		return static::findOneBy($arrColumns, array($intId));
 	}

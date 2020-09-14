@@ -1,10 +1,14 @@
 {
-	"name":"friends-of-contao/contao-memberlist",
-	"description":"List the members of your website and allow them to send e-mails (depending on their privacy settings).",
-	"keywords":["contao","members","list"],
-	"type":"contao-module",
-	"license":"LGPL-3.0+",
-	"authors":[
+	"name": "friends-of-contao/contao-memberlist",
+	"description": "List the members of your website and allow them to send e-mails (depending on their privacy settings).",
+	"keywords": [
+		"contao",
+		"members",
+		"list"
+	],
+	"type": "contao-bundle",
+	"license": "LGPL-3.0+",
+	"authors": [
 		{
 			"name": "Leo Unglaub",
 			"email": "leo@unglaub.at",
@@ -12,35 +16,29 @@
 			"role": "Developer"
 		},
 		{
-			"name":"Helmut Schottmüller",
-			"homepage":"http://www.aurealis.de"
+			"name": "Helmut Schottmï¿½ller",
+			"homepage": "http://www.aurealis.de"
 		},
 		{
-			"name":"Cliff Parnitzky",
-			"email":"contao@cliff-parnitzky.de",
-			"role":"Developer"
+			"name": "Cliff Parnitzky",
+			"email": "contao@cliff-parnitzky.de",
+			"role": "Developer"
 		}
 	],
-	"support":{
-		"issues":"https://github.com/friends-of-contao/contao-php-info/issues",
-		"source":"https://github.com/friends-of-contao/contao-php-info"
+	"support": {
+		"issues": "https://github.com/friends-of-contao/contao-php-info/issues",
+		"source": "https://github.com/friends-of-contao/contao-php-info"
 	},
-	"require":{
-		"php":">=5.3",
-		"contao/core-bundle":"~3.5 || ~4.4",
-		"contao-community-alliance/composer-plugin":"~2.4 || ~3.0"
+	"require": {
+		"php": ">=7.0",
+		"contao/core-bundle": "^4.8"
 	},
-	"replace": {
-		"contao-legacy/memberlist": "*"
-	},
-	"extra":{
-		"contao":{
-			"sources":{
-				"system/modules/memberlist":"system/modules/memberlist"
-			}
-		},
-		"branch-alias": {
-			"dev-master": "2.0.x-dev"
+    "autoload": {
+        "psr-4": {
+			"Foc\\Memberlist\\": "src/"
 		}
+	},
+	"extra": {
+		"contao-manager-plugin": "Foc\\Memberlist\\ContaoManager\\Plugin"
 	}
 }
