@@ -86,6 +86,8 @@ class ModuleMemberlist extends \Module
 	 */
 	protected function listAllMembers()
 	{
+		\Contao\Controller::loadDataContainer('tl_member');
+
 		$arrSortedFields = array();
 
 		// Sort fields
