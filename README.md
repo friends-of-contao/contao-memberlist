@@ -4,8 +4,9 @@ contao_memberlist
 Contao Mitgliederlisten-Erweiterung
 
 Diese Erweiterung pflegt die Mitgliederlisten-Erweiterung, die seit Contao 2.9 nicht mehr Teil des Contao Core ist.
-memberlist stellt ein Modul Mitgliederliste zur Verfügung, mit dem sich Daten von Contao-Mitgliedern im Frontend ausgaben lassen.
-Damit die Mitglieder die volle Kontrolle haben, welche Daten ausgegeben werden dürfen, gibt es in jedem Mitglieder-Datensatz eine zusätzliche Kategorie "Öffentliches Profil", in dem für jedes einzelne Feld festgelegt werden kann, ob der Inhalt in einer Mitgliederliste ausgegeben werden darf oder nicht.
+memberlist stellt ein Modul Mitgliederliste zur Verfügung, mit dem sich Daten von Contao-Mitgliedern im Frontend ausgeben lassen.
+
+Mitglieder sollten die volle Kontrolle darüber haben, welche Daten ausgegeben werden dürfen. Deshalb gibt es in jedem Mitglieder-Datensatz eine zusätzliche Kategorie “Öffentliches Profil”. Dort kann für jedes einzelne Feld festgelegt werden, ob der Inhalt in einer Mitgliederliste ausgegeben werden darf oder ob nicht.
 
 Damit Contao-Erweiterungen, die eigene Feldtypen definieren die Möglichkeit haben ihren Inhalt in der Mitgliederliste auszugeben, gibt es seit der Version memberlist 1.3.1 einen Contao Hook, über den sich Erweiterungen in die Ausgabe "einklinken" können:
 
