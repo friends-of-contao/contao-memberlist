@@ -12,7 +12,7 @@
 			"role": "Developer"
 		},
 		{
-			"name":"Helmut Schottmüller",
+			"name":"Helmut SchottmÃ¼ller",
 			"homepage":"http://www.aurealis.de"
 		},
 		{
@@ -22,8 +22,8 @@
 		}
 	],
 	"support":{
-		"issues":"https://github.com/friends-of-contao/contao-php-info/issues",
-		"source":"https://github.com/friends-of-contao/contao-php-info"
+		"issues":"https://github.com/friends-of-contao/contao-memberlist/issues",
+		"source":"https://github.com/friends-of-contao/contao-memberlist"
 	},
 	"require":{
 		"php":">=5.3",
