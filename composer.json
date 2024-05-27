@@ -1,46 +1,46 @@
 {
-	"name":"friends-of-contao/contao-memberlist",
-	"description":"List the members of your website and allow them to send e-mails (depending on their privacy settings).",
-	"keywords":["contao","members","list"],
-	"type":"contao-module",
-	"license":"LGPL-3.0+",
-	"authors":[
-		{
-			"name": "Leo Unglaub",
-			"email": "leo@unglaub.at",
-			"homepage": "https://leo.unglaub.at",
-			"role": "Developer"
-		},
-		{
-			"name":"Helmut Schottmüller",
-			"homepage":"http://www.aurealis.de"
-		},
-		{
-			"name":"Cliff Parnitzky",
-			"email":"contao@cliff-parnitzky.de",
-			"role":"Developer"
-		}
-	],
-	"support":{
-		"issues":"https://github.com/friends-of-contao/contao-memberlist/issues",
-		"source":"https://github.com/friends-of-contao/contao-memberlist"
-	},
-	"require":{
-		"php":">=7.4",
-		"contao/core-bundle":"~3.5 || ~4.4",
-		"contao-community-alliance/composer-plugin":"~2.4 || ~3.0"
-	},
-	"replace": {
-		"contao-legacy/memberlist": "*"
-	},
-	"extra":{
-		"contao":{
-			"sources":{
-				"system/modules/memberlist":"system/modules/memberlist"
-			}
-		},
-		"branch-alias": {
-			"dev-master": "2.0.x-dev"
-		}
-	}
+    "name": "friends-of-contao/contao-memberlist",
+    "description": "List the members of your website and allow them to send e-mails (depending on their privacy settings).",
+    "keywords": ["contao", "members", "list"],
+    "type": "contao-module",
+    "license": "LGPL-3.0+",
+    "authors": [
+        {
+            "name": "Leo Unglaub",
+            "email": "leo@unglaub.at",
+            "homepage": "https://leo.unglaub.at",
+            "role": "Developer"
+        },
+        {
+            "name": "Helmut Schottmüller",
+            "homepage": "http://www.aurealis.de"
+        },
+        {
+            "name": "Cliff Parnitzky",
+            "email": "contao@cliff-parnitzky.de",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/friends-of-contao/contao-memberlist/issues",
+        "source": "https://github.com/friends-of-contao/contao-memberlist"
+    },
+    "require": {
+        "php": ">=7.4",
+        "contao/core-bundle": "^3.5 || ^4.4",
+        "contao-community-alliance/composer-plugin": "^2.4 || ^3.0"
+    },
+    "replace": {
+        "contao-legacy/memberlist": "*"
+    },
+    "extra": {
+        "contao": {
+            "sources": {
+                "system/modules/memberlist": "system/modules/memberlist"
+            }
+        },
+        "branch-alias": {
+            "dev-master": "2.0.x-dev"
+        }
+    }
 }
