@@ -190,6 +190,11 @@ class ModuleMemberlist extends \Module
 
 				foreach ($this->arrMlFields as $k=>$v)
 				{
+					if (false === ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['feViewable'] ?? null))
+					{
+						continue;
+					}
+
 					$value = '-';
 
 					if ($v == 'username' || in_array($v, $publicFields))

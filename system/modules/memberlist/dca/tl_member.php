@@ -70,7 +70,16 @@ class tl_member_memberlist extends Backend
 				continue;
 			}
 
-			if (isset($v['eval']['feViewable']) && $v['eval']['feViewable'])
+			$viewable = $v['eval']['feViewable'] ?? null;
+
+			if (false === $viewable)
+			{
+				continue;
+			}
+
+			$editable = $v['eval']['feEditable'] ?? null;
+
+			if ($viewable || $editable)
 			{
 				$return[$k] = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['label'][0];
 			}
@@ -79,4 +88,3 @@ class tl_member_memberlist extends Backend
 		return $return;
 	}
 }
-

@@ -26,7 +26,7 @@
 		"source":"https://github.com/friends-of-contao/contao-memberlist"
 	},
 	"require":{
-		"php":">=5.3",
+		"php":">=7.4",
 		"contao/core-bundle":"~3.5 || ~4.4",
 		"contao-community-alliance/composer-plugin":"~2.4 || ~3.0"
 	},
