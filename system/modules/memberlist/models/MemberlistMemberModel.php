@@ -124,9 +124,9 @@ class MemberlistMemberModel extends \Model
 		$strWhere = '';
 
 		// Search query
-		if (strlen($search) && strlen($for) && $for != '*')
+		if ($search && $for && $for !== '*')
 		{
-			$strWhere .= $t.'.'.$search . " REGEXP ? AND ";
+			$strWhere .= $t.'.'.Database::quoteIdentifier($search)." REGEXP ? AND ";
 			$arrValues[] = $for;
 		}
 

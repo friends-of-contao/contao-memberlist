@@ -2,6 +2,7 @@
 
 namespace Contao;
 
+use Contao\Input;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -133,8 +134,36 @@ class ModuleMemberlist extends \Module
 			}
 		}
 
-		$memberCollection = \MemberlistMemberModel::findActiveMembers($this->arrMlFields, $this->arrMlGroups, $order_by, $additionaloptions, $limit, $offset, \Input::get('search'), \Input::get('for'));
-		$total = \MemberlistMemberModel::countActiveMembers($this->arrMlFields, $this->arrMlGroups, $additionaloptions, \Input::get('search'), \Input::get('for'));
+		if ($searchField = Input::get('search'))
+		{
+			if (!isset($GLOBALS['TL_DCA']['tl_member']['fields'][$searchField]))
+			{
+				$searchField = null;
+			}
+			else
+			{
+				$viewable = $GLOBALS['TL_DCA']['tl_member']['fields'][$searchField]['eval']['feViewable'] ?? null;
+
+				if (false === $viewable)
+				{
+					$searchField = null;
+				}
+				else
+				{
+					$editable = $GLOBALS['TL_DCA']['tl_member']['fields'][$searchField]['eval']['feEditable'] ?? null;
+
+					if (!$viewable && !$editable)
+					{
+						$searchField = null;
+					}
+				}
+			}
+		}
+
+		$for = Input::get('for');
+
+		$memberCollection = \MemberlistMemberModel::findActiveMembers($this->arrMlFields, $this->arrMlGroups, $order_by, $additionaloptions, $limit, $offset, $searchField, $for);
+		$total = \MemberlistMemberModel::countActiveMembers($this->arrMlFields, $this->arrMlGroups, $additionaloptions, $searchField, $for);
 
 		// Prepare URL
 		$strUrl = preg_replace('/\?.*$/', '', \Environment::get('request'));
