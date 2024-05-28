@@ -2,6 +2,8 @@
 
 namespace Contao;
 
+use Symfony\Component\HttpFoundation\Session\Session;
+
 /**
  * Class ModuleMemberlist
  *
@@ -289,10 +291,17 @@ class ModuleMemberlist extends \Module
 		$this->Template->emailDisabled = $GLOBALS['TL_LANG']['MSC']['emailDisabled'];
 
 		// Confirmation message
-		if ($_SESSION['TL_EMAIL_SENT'])
+		/** @var Session $session */
+		$session = System::getContainer()->get('request_stack')->getCurrentRequest()->getSession();
+
+		if ($session->isStarted())
 		{
-			$this->Template->confirm = $GLOBALS['TL_LANG']['MSC']['messageSent'];
-			$_SESSION['TL_EMAIL_SENT'] = false;
+			$flashBag = $session->getFlashBag();
+
+			if ($message = $flashBag->get('TL_EMAIL_SENT'))
+			{
+				$this->Template->confirm = $message;
+			}
 		}
 
 		// Check personal message settings
@@ -406,7 +415,11 @@ class ModuleMemberlist extends \Module
 
 		// Send e-mail
 		$objEmail->sendTo($objMember->email);
-		$_SESSION['TL_EMAIL_SENT'] = true;
+
+		/** @var Session $session */
+		$session = System::getContainer()->get('request_stack')->getCurrentRequest()->getSession();
+		$flashBag = $session->getFlashBag();
+		$flashBag->set('TL_EMAIL_SENT', $GLOBALS['TL_LANG']['MSC']['messageSent']);
 
 		$this->reload();
 	}
