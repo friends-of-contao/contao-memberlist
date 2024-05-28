@@ -190,7 +190,16 @@ class ModuleMemberlist extends \Module
 
 				foreach ($this->arrMlFields as $k=>$v)
 				{
-					if (false === ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['feViewable'] ?? null))
+					$viewable = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['feViewable'] ?? null;
+
+					if (false === $viewable)
+					{
+						continue;
+					}
+
+					$editable = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['feEditable'] ?? null;
+
+					if (!$viewable && !$editable)
 					{
 						continue;
 					}
