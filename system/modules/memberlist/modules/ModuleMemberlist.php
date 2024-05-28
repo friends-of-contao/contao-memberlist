@@ -380,9 +380,6 @@ class ModuleMemberlist extends \Module
 	protected function sendPersonalMessage($objMember, Widget $objWidget)
 	{
 		$objEmail = new Email();
-
-		$objEmail->from = $GLOBALS['TL_ADMIN_EMAIL'];
-		$objEmail->fromName = 'Contao mailer';
 		$objEmail->text = $objWidget->value;
 
 		// Add reply to
