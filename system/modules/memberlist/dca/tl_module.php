@@ -8,11 +8,12 @@
  * @filesource
  */
 
+use Contao\ModuleMemberlist;
 
 /**
  * Add palettes to tl_module
  */
-$GLOBALS['TL_DCA']['tl_module']['palettes']['memberlist'] = '{title_legend},name,headline,type;{config_legend},ml_groups,ml_fields,perPage;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['memberlist'] = '{title_legend},name,headline,type;{config_legend},ml_groups,ml_fields,perPage;{image_legend:hide},imgSize;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 
 
 /**
@@ -34,7 +35,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['ml_fields'] = array
 	'exclude'            => true,
 	'inputType'          => 'checkboxWizard',
 	'options_callback'   => array('tl_module_memberlist', 'getViewableMemberProperties'),
-	'eval'               => array('mandatory'=>true, 'multiple'=>true),
+	'eval'               => array('multiple'=>true),
 	'sql'                => "blob NULL"
 );
 
@@ -61,21 +62,19 @@ class tl_module_memberlist extends Backend
 		$this->loadLanguageFile('tl_member');
 		$this->loadDataContainer('tl_member');
 
-		foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $k=>$v)
+		foreach (array_keys($GLOBALS['TL_DCA']['tl_member']['fields']) as $field)
 		{
-			if ($k == 'password' || $k == 'newsletter' || $k == 'publicFields' || $k == 'allowEmail')
+			if ($field == 'username' || $field == 'password' || $field == 'newsletter' || $field == 'publicFields' || $field == 'allowEmail')
 			{
 				continue;
 			}
 
-			if ($v['eval']['feViewable'])
+			if (ModuleMemberlist::isViewable($field))
 			{
-				$return[$k] = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['label'][0];
+				$return[$field] = $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['label'][0];
 			}
 		}
 
 		return $return;
 	}
 }
-
-?>

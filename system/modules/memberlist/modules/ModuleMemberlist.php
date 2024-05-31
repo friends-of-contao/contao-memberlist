@@ -2,7 +2,14 @@
 
 namespace Contao;
 
+use Contao\CoreBundle\Image\ImageFactoryInterface;
+use Contao\Environment;
+use Contao\FilesModel;
+use Contao\Image;
 use Contao\Input;
+use Contao\MemberlistMemberModel;
+use Contao\Module;
+use Contao\StringUtil;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -12,7 +19,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  * @author     Helmut Schottmüller <https://github.com/hschottm>
  * @package    Controller
  */
-class ModuleMemberlist extends \Module
+class ModuleMemberlist extends Module
 {
 
 	/**
@@ -53,8 +60,8 @@ class ModuleMemberlist extends \Module
 			return $objTemplate->parse();
 		}
 
-		$this->arrMlGroups = deserialize($this->ml_groups, true);
-		$this->arrMlFields = deserialize($this->ml_fields, true);
+		$this->arrMlGroups = StringUtil::deserialize($this->ml_groups, true);
+		$this->arrMlFields = StringUtil::deserialize($this->ml_fields, true);
 
 		if (count($this->arrMlGroups) < 1 || count($this->arrMlFields) < 1)
 		{
@@ -73,9 +80,9 @@ class ModuleMemberlist extends \Module
 		$this->loadDataContainer('tl_member');
 		$this->loadLanguageFile('tl_member');
 
-		if (\Input::get('show'))
+		if (Input::get('show'))
 		{
-			$this->listSingleMember(\Input::get('show'));
+			$this->listSingleMember(Input::get('show'));
 		}
 		else
 		{
@@ -100,19 +107,20 @@ class ModuleMemberlist extends \Module
 		}
 
 		natcasesort($arrSortedFields);
+		$strOptions = '';
 
 		// Add searchable fields to drop-down menu
 		foreach ($arrSortedFields as $k=>$v)
 		{
-			$strOptions .= '  <option value="' . $k . '"' . (($k == \Input::get('search')) ? ' selected="selected"' : '') . '>' . $v . '</option>' . "\n";
+			$strOptions .= '  <option value="' . $k . '"' . (($k == Input::get('search')) ? ' selected="selected"' : '') . '>' . $v . '</option>' . "\n";
 		}
 
 		$this->Template->search_fields = $strOptions;
 
-		$order_by = \Input::get('order_by') ? \Input::get('order_by') . ' ' . \Input::get('sort') : 'username';
+		$order_by = Input::get('order_by') ? Input::get('order_by') . ' ' . Input::get('sort') : 'username';
 		// Split results
-		$page = \Input::get('page') ? \Input::get('page') : 1;
-		$per_page = \Input::get('per_page') ? \Input::get('per_page') : $this->perPage;
+		$page = Input::get('page') ? Input::get('page') : 1;
+		$per_page = Input::get('per_page') ? Input::get('per_page') : $this->perPage;
 
 		// Limit
 		$limit = 0;
@@ -140,33 +148,19 @@ class ModuleMemberlist extends \Module
 			{
 				$searchField = null;
 			}
-			else
+			elseif (!self::isViewable($searchField))
 			{
-				$viewable = $GLOBALS['TL_DCA']['tl_member']['fields'][$searchField]['eval']['feViewable'] ?? null;
-
-				if (false === $viewable)
-				{
-					$searchField = null;
-				}
-				else
-				{
-					$editable = $GLOBALS['TL_DCA']['tl_member']['fields'][$searchField]['eval']['feEditable'] ?? null;
-
-					if (!$viewable && !$editable)
-					{
-						$searchField = null;
-					}
-				}
+				$searchField = null;
 			}
 		}
 
 		$for = Input::get('for');
 
-		$memberCollection = \MemberlistMemberModel::findActiveMembers($this->arrMlFields, $this->arrMlGroups, $order_by, $additionaloptions, $limit, $offset, $searchField, $for);
-		$total = \MemberlistMemberModel::countActiveMembers($this->arrMlFields, $this->arrMlGroups, $additionaloptions, $searchField, $for);
+		$memberCollection = MemberlistMemberModel::findActiveMembers($this->arrMlFields, $this->arrMlGroups, $order_by, $additionaloptions, $limit, $offset, $searchField, $for);
+		$total = MemberlistMemberModel::countActiveMembers($this->arrMlFields, $this->arrMlGroups, $additionaloptions, $searchField, $for);
 
 		// Prepare URL
-		$strUrl = preg_replace('/\?.*$/', '', \Environment::get('request'));
+		$strUrl = preg_replace('/\?.*$/', '', Environment::get('request'));
 		$this->Template->url = $strUrl;
 		$blnQuery = false;
 
@@ -193,17 +187,17 @@ class ModuleMemberlist extends \Module
 			$sort = 'asc';
 			$strField = strlen($label = $GLOBALS['TL_DCA']['tl_member']['fields'][$this->arrMlFields[$i]]['label'][0]) ? $label : $this->arrMlFields[$i];
 
-			if (\Input::get('order_by') == $this->arrMlFields[$i])
+			if (Input::get('order_by') == $this->arrMlFields[$i])
 			{
-				$sort = (\Input::get('sort') == 'asc') ? 'desc' : 'asc';
-				$class = ' sorted ' . \Input::get('sort');
+				$sort = (Input::get('sort') == 'asc') ? 'desc' : 'asc';
+				$class = ' sorted ' . Input::get('sort');
 			}
 
 			$arrTh[] = array
 			(
 				'link' => $strField,
-				'href' => (ampersand($strUrl) . $strVarConnector . 'order_by=' . $this->arrMlFields[$i]) . '&amp;sort=' . $sort,
-				'title' => specialchars(sprintf($GLOBALS['TL_LANG']['MSC']['list_orderBy'], $strField)),
+				'href' => (StringUtil::ampersand($strUrl) . $strVarConnector . 'order_by=' . $this->arrMlFields[$i]) . '&amp;sort=' . $sort,
+				'title' => StringUtil::specialchars(sprintf($GLOBALS['TL_LANG']['MSC']['list_orderBy'], $strField)),
 				'class' => $class . (($i == 0) ? ' col_first' : '')
 			);
 		}
@@ -216,21 +210,12 @@ class ModuleMemberlist extends \Module
 			// TBODY
 			while ($memberCollection->next())
 			{
-				$publicFields = deserialize($memberCollection->publicFields, true);
+				$publicFields = StringUtil::deserialize($memberCollection->publicFields, true);
 				$class = 'row_' . ++$start . (($start == 0) ? ' row_first' : '') . ((($start + 1) == $lim) ? ' row_last' : '') . ((($start % 2) == 0) ? ' even' : ' odd');
 
 				foreach ($this->arrMlFields as $k=>$v)
 				{
-					$viewable = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['feViewable'] ?? null;
-
-					if (false === $viewable)
-					{
-						continue;
-					}
-
-					$editable = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['feEditable'] ?? null;
-
-					if (!$viewable && !$editable)
+					if (!self::isViewable($v))
 					{
 						continue;
 					}
@@ -272,10 +257,10 @@ class ModuleMemberlist extends \Module
 		$this->Template->per_page_label = specialchars($GLOBALS['TL_LANG']['MSC']['list_perPage']);
 		$this->Template->fields_label = $GLOBALS['TL_LANG']['MSC']['all_fields'][0];
 		$this->Template->keywords_label = $GLOBALS['TL_LANG']['MSC']['keywords'];
-		$this->Template->search = \Input::get('search');
-		$this->Template->for = \Input::get('for');
-		$this->Template->order_by = \Input::get('order_by');
-		$this->Template->sort = \Input::get('sort');
+		$this->Template->search = Input::get('search');
+		$this->Template->for = Input::get('for');
+		$this->Template->order_by = Input::get('order_by');
+		$this->Template->sort = Input::get('sort');
 	}
 
 
@@ -292,7 +277,7 @@ class ModuleMemberlist extends \Module
 		$this->Template->record = array();
 
 		// Get member
-		$objMember = \MemberlistMemberModel::findActiveById($id);
+		$objMember = MemberlistMemberModel::findActiveById($id);
 
 		// No member found or group not allowed
 		if (null == $objMember || count(array_intersect(deserialize($objMember->groups, true), $this->arrMlGroups)) < 1)
@@ -320,16 +305,18 @@ class ModuleMemberlist extends \Module
 		$this->Template->emailDisabled = $GLOBALS['TL_LANG']['MSC']['emailDisabled'];
 
 		// Confirmation message
-		/** @var Session $session */
-		$session = System::getContainer()->get('request_stack')->getCurrentRequest()->getSession();
+		if (class_exists(Session::class)) {
+			/** @var Session $session */
+			$session = System::getContainer()->get('request_stack')->getCurrentRequest()->getSession();
 
-		if ($session->isStarted())
-		{
-			$flashBag = $session->getFlashBag();
-
-			if ($message = $flashBag->get('TL_EMAIL_SENT'))
+			if ($session->isStarted())
 			{
-				$this->Template->confirm = $message;
+				$flashBag = $session->getFlashBag();
+
+				if ($message = $flashBag->get('TL_EMAIL_SENT'))
+				{
+					$this->Template->confirm = $message;
+				}
 			}
 		}
 
@@ -432,23 +419,25 @@ class ModuleMemberlist extends \Module
 				$replyTo = $this->User->firstname . ' ' . $this->User->lastname . ' <' . $replyTo . '>';
 			}
 
-			$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['subjectFeUser'], $this->User->username, \Environment::get('host'));
-			$objEmail->text .= "\n\n---\n\n" . sprintf($GLOBALS['TL_LANG']['MSC']['sendersProfile'], \Environment::get('base') . preg_replace('/show=[0-9]+/', 'show=' . $this->User->id, \Environment::get('request')));
+			$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['subjectFeUser'], $this->User->username, Environment::get('host'));
+			$objEmail->text .= "\n\n---\n\n" . sprintf($GLOBALS['TL_LANG']['MSC']['sendersProfile'], Environment::get('base') . preg_replace('/show=[0-9]+/', 'show=' . $this->User->id, Environment::get('request')));
 
 			$objEmail->replyTo($replyTo);
 		}
 		else
 		{
-			$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['subjectUnknown'], \Environment::get('host'));
+			$objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['subjectUnknown'], Environment::get('host'));
 		}
 
 		// Send e-mail
 		$objEmail->sendTo($objMember->email);
 
-		/** @var Session $session */
-		$session = System::getContainer()->get('request_stack')->getCurrentRequest()->getSession();
-		$flashBag = $session->getFlashBag();
-		$flashBag->set('TL_EMAIL_SENT', $GLOBALS['TL_LANG']['MSC']['messageSent']);
+		if (class_exists(Session::class)) {
+			/** @var Session $session */
+			$session = System::getContainer()->get('request_stack')->getCurrentRequest()->getSession();
+			$flashBag = $session->getFlashBag();
+			$flashBag->set('TL_EMAIL_SENT', $GLOBALS['TL_LANG']['MSC']['messageSent']);
+		}
 
 		$this->reload();
 	}
@@ -463,7 +452,7 @@ class ModuleMemberlist extends \Module
 	 */
 	protected function formatValue($k, $value, $blnListSingle=false)
 	{
-		$value = deserialize($value);
+		$value = StringUtil::deserialize($value);
 
 		// HOOK: Custom member list field output
 		if (isset($GLOBALS['TL_HOOKS']['memberListFormatValue']) && is_array($GLOBALS['TL_HOOKS']['memberListFormatValue']))
@@ -479,18 +468,18 @@ class ModuleMemberlist extends \Module
 		// Avatar
 		if (strcmp($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['inputType'], 'avatar') == 0)
 		{
-			$objFile = \FilesModel::findByUuid($value);
+			$objFile = FilesModel::findByUuid($value);
+
 			if ($objFile === null && $GLOBALS['TL_CONFIG']['avatar_fallback_image']) {
-				$objFile = \FilesModel::findByUuid($GLOBALS['TL_CONFIG']['avatar_fallback_image']);
+				$objFile = FilesModel::findByUuid($GLOBALS['TL_CONFIG']['avatar_fallback_image']);
 			}
 
-			if ($objFile !== null) {
-				$value = '<img src="' . TL_FILES_URL . \Image::get(
-					$objFile->path,
-					$arrImage[0],
-					$arrImage[1],
-					$arrImage[2]
-				) . '" width="' . $arrImage[0] . '" height="' . $arrImage[1] . '" alt="' . $strAlt . '" class="avatar">';
+			if ($objFile !== null && class_exists(ImageFactoryInterface::class)) {
+				$size = StringUtil::deserialize($this->imgSize, true) + [0, 0, 'crop'];
+				$projectDir = System::getContainer()->getParameter('kernel.project_dir');
+				/** @var ImageFactoryInterface */
+				$imageFactory = System::getContainer()->get('contao.image.factory');
+				$value = Image::getHtml($imageFactory->create($projectDir.'/'. $objFile->path, $size)->getUrl($projectDir), '', 'class="avatar"');
 			}
 			else
 			{
@@ -517,44 +506,44 @@ class ModuleMemberlist extends \Module
 		}
 
 		// Date
-		elseif ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] == 'date')
+		elseif ('date' === ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] ?? null))
 		{
 			$value = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $value);
 		}
 
 		// Time
-		elseif ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] == 'time')
+		elseif ('time' === ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] ?? null))
 		{
 			$value = $this->parseDate($GLOBALS['TL_CONFIG']['timeFormat'], $value);
 		}
 
 		// Date and time
-		elseif ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] == 'datim')
+		elseif ('datim' === ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] ?? null))
 		{
 			$value = $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $value);
 		}
 
 		// URLs
-		elseif ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] == 'url' && preg_match('@^(https?://|ftp://)@i', $value))
+		elseif ('url' === ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] ?? null) && preg_match('@^(https?://|ftp://)@i', $value))
 		{
 			$value = '<a href="' . $value . '"' . LINK_NEW_WINDOW . '>' . $value . '</a>';
 		}
 
 		// E-mail addresses
-		elseif ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] == 'email')
+		elseif ('email' === ($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['eval']['rgxp'] ?? null))
 		{
-			$value = \StringUtil::encodeEmail($value);
+			$value = StringUtil::encodeEmail($value);
 			$value = '<a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;' . $value . '">' . $value . '</a>';
 		}
 
 		// Reference
-		elseif (is_array($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['reference']))
+		elseif (is_array($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['reference'] ?? null))
 		{
 			$value = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['reference'][$value];
 		}
 
 		// Associative array
-		elseif (array_is_assoc($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['options']))
+		elseif (array_is_assoc($GLOBALS['TL_DCA']['tl_member']['fields'][$k]['options'] ?? null))
 		{
 			if ($blnListSingle)
 			{
@@ -568,5 +557,20 @@ class ModuleMemberlist extends \Module
 
 		return strlen($value) ? $value :  '-';
 	}
-}
 
+	public static function isViewable(string $field): bool
+	{
+		Controller::loadDataContainer('tl_member');
+
+		$viewable = $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['eval']['feViewable'] ?? null;
+
+		if (false === $viewable)
+		{
+			return false;
+		}
+
+		$editable = $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['eval']['feEditable'] ?? null;
+
+		return $viewable || $editable;
+	}
+}

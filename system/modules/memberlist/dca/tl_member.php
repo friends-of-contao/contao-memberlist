@@ -8,6 +8,7 @@
  * @filesource
  */
 
+use Contao\ModuleMemberlist;
 
 /**
  * Add palettes to tl_member
@@ -63,25 +64,16 @@ class tl_member_memberlist extends Backend
 		$this->loadLanguageFile('tl_member');
 		$this->loadDataContainer('tl_member');
 
-		foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $k=>$v)
+		foreach (array_keys($GLOBALS['TL_DCA']['tl_member']['fields']) as $field)
 		{
-			if ($k == 'username' || $k == 'password' || $k == 'newsletter' || $k == 'publicFields' || $k == 'allowEmail')
+			if ($field == 'username' || $field == 'password' || $field == 'newsletter' || $field == 'publicFields' || $field == 'allowEmail')
 			{
 				continue;
 			}
 
-			$viewable = $v['eval']['feViewable'] ?? null;
-
-			if (false === $viewable)
+			if (ModuleMemberlist::isViewable($field))
 			{
-				continue;
-			}
-
-			$editable = $v['eval']['feEditable'] ?? null;
-
-			if ($viewable || $editable)
-			{
-				$return[$k] = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['label'][0];
+				$return[$field] = $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['label'][0];
 			}
 		}
 
