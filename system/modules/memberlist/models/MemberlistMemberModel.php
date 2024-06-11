@@ -16,6 +16,8 @@
  */
 namespace Contao;
 
+use Doctrine\DBAL\Connection;
+
 
 /**
  * Memberlist specific model methods
@@ -126,7 +128,14 @@ class MemberlistMemberModel extends \Model
 		// Search query
 		if ($search && $for && $for !== '*')
 		{
-			$strWhere .= $t.'.'.Database::quoteIdentifier($search)." REGEXP ? AND ";
+			if (method_exists(System::class, 'getContainer') && ($container = System::getContainer())->has('database_connection')) {
+				/** @var Connection $connection */
+				$connection = $container->get('database_connection');
+				$strWhere .= $t.'.'.$connection->quoteIdentifier($search)." REGEXP ? AND ";
+			} else {
+				$strWhere .= $t.'.'.Database::quoteIdentifier($search)." REGEXP ? AND ";
+			}
+
 			$arrValues[] = $for;
 		}
 
