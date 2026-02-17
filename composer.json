@@ -6,12 +6,6 @@
     "license": "LGPL-3.0+",
     "authors": [
         {
-            "name": "Leo Unglaub",
-            "email": "leo@unglaub.at",
-            "homepage": "https://leo.unglaub.at",
-            "role": "Developer"
-        },
-        {
             "name": "Helmut Schottmüller",
             "homepage": "http://www.aurealis.de"
         },
